@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 def new_photo_path(instance, filename):
-    return f'photos/{instance.author.username}/{datetime.now().year}/{datetime.now().month}/{datetime.now().day}/{instance.title}'
+    return f'photos/{instance.author.username}/{datetime.now().year}/{datetime.now().month}/{datetime.now().day}/{instance.title}.{filename.split(".")[-1]}'
 
 
 class Perfil(models.Model):
