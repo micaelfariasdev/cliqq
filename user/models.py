@@ -19,7 +19,7 @@ class Perfil(models.Model):
 
 
 class Photos(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos')
     image = models.ImageField(upload_to=new_photo_path)
     title = models.CharField(max_length=100, blank=False, null=False)
     views = models.IntegerField(default=0)

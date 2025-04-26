@@ -1,16 +1,22 @@
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, permissions
-from .serializer import RegisterSerializer, PhotoSerializer
+from .serializer import UserSerializer, PhotoSerializer
 from user.models import Photos
 
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
+class UserView(ViewSet):
+    def list(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request):
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'detail': 'Usuário criado com sucesso'}, status=status.HTTP_201_CREATED)
