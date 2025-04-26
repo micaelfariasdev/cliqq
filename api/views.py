@@ -43,9 +43,10 @@ class PhotosView(ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        permission_classes = [permissions.IsAuthenticated]
+        self.permission_classes = [permissions.IsAuthenticated]
         serializer = PhotoSerializer(data=request.data)
-        print(request.auth.user_id)
+        if not request.user.is_authenticated:
+            return Response({'error': 'Você precisa estar logado para criar uma foto'}, status=status.HTTP_401_UNAUTHORIZED)
         if serializer.is_valid():
             serializer.save(author=request.user)
             return Response({'succes': 'criando com sucesso'}, status=status.HTTP_201_CREATED)

@@ -1,0 +1,115 @@
+📸 Projeto de Estudo: Plataforma de Compartilhamento de Fotos
+1. Objetivo
+Criar uma plataforma onde usuários possam:
+
+Se cadastrar/login
+
+Enviar fotos (com título e descrição)
+
+Visualizar todas as fotos (sem necessidade de login para visualizar)
+
+Contabilizar número de visualizações por foto
+
+Gerenciar suas próprias fotos (editar e deletar)
+
+2. Requisitos Funcionais
+Cadastro/Login de Usuários
+
+Criar conta com e-mail e senha ✅
+
+Fazer login e logout ✅
+
+Reset de senha (opcional para estudo extra)
+
+Envio de Fotos ✅
+
+Usuário autenticado pode fazer upload de uma imagem
+
+Cada foto terá: título, descrição e imagem
+
+As imagens devem ser salvas com controle de caminho seguro (upload_to dinâmico por usuário)
+
+Visualização de Fotos
+
+Qualquer pessoa (cadastrada ou não) pode ver todas as fotos
+
+Exibir uma lista de fotos (ex.: paginação ou scroll infinito)
+
+Página de detalhe da foto (exibir título, descrição, foto, autor, contador de views)
+
+Contador de Visualizações
+
+Cada vez que a página de detalhe de uma foto for acessada, incrementar +1 no contador
+
+Não precisa controlar visualizações únicas no primeiro momento
+
+Gerenciamento de Fotos
+
+Usuário autenticado pode:
+
+Ver suas próprias fotos
+
+Editar o título e descrição de suas fotos
+
+Excluir suas fotos
+
+3. Entidades e Modelos Principais
+User (usuário padrão do Django, ou extensão se quiser praticar)
+
+Photo
+
+title: CharField
+
+description: TextField
+
+image: ImageField
+
+author: ForeignKey para User
+
+views: IntegerField (default=0)
+
+created_at: DateTimeField (auto_now_add=True)
+
+4. Endpoints (API REST)
+/api/auth/register/ → Registro de usuário
+
+/api/auth/login/ → Login
+
+/api/auth/logout/ → Logout
+
+/api/photos/ → Listar todas as fotos (GET), Enviar nova foto (POST)
+
+/api/photos/<photo_id>/ → Detalhar uma foto (GET), Editar (PUT/PATCH), Deletar (DELETE)
+
+/api/my-photos/ → Listar fotos do usuário autenticado (GET)
+
+5. Regras Especiais
+Upload protegido: apenas usuários logados podem fazer upload.
+
+Visualização livre: qualquer usuário (logado ou não) pode consumir a listagem e detalhe.
+
+Views: cada GET de /api/photos/<photo_id>/ incrementa o contador.
+
+6. Tecnologias Sugeridas
+Backend: Django + Django REST Framework
+
+Banco de Dados: PostgreSQL ou SQLite para estudo
+
+Auth: Token simples (ou JWT para prática mais avançada)
+
+Upload de imagens: Usar MEDIA_ROOT e MEDIA_URL para servir imagens localmente
+
+Deploy futuro (se quiser praticar): Render.com ou Railway.app
+
+7. Extras opcionais para evoluir depois
+✅ Comentários nas fotos
+
+✅ Curtidas nas fotos
+
+✅ Ordenação de fotos por mais vistas, mais recentes, mais curtidas
+
+✅ Implementar visualizações únicas por IP
+
+✅ Sistema de categorias/tags para fotos
+
+✅ Upload de múltiplas fotos em uma única postagem
