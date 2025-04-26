@@ -1,5 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
+
+
+def new_photo_path(instance, filename):
+    return f'photos/{instance.author.username}/{datetime.now().year}/{datetime.now().month}/{datetime.now().day}/{instance.title}'
 
 
 class Perfil(models.Model):
@@ -12,10 +17,11 @@ class Perfil(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Photos(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='photos/')
-    title = models.CharField(blank=True, null=True)
+    image = models.ImageField(upload_to=new_photo_path)
+    title = models.CharField(max_length=100, blank=False, null=False)
     views = models.IntegerField(default=0)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

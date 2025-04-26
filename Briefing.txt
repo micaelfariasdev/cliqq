@@ -23,9 +23,9 @@ Reset de senha (opcional para estudo extra)
 
 Envio de Fotos ✅
 
-Usuário autenticado pode fazer upload de uma imagem
+Usuário autenticado pode fazer upload de uma imagem ✅
 
-Cada foto terá: título, descrição e imagem
+Cada foto terá: título, descrição e imagem ✅
 
 As imagens devem ser salvas com controle de caminho seguro (upload_to dinâmico por usuário)
 
