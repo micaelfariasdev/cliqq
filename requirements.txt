@@ -1,6 +1,7 @@
 asgiref==3.8.1
-Django==5.2
-djangorestframework==3.16.0
+Django
+django-cors-headers
+djangorestframework
 gunicorn==23.0.0
 packaging==25.0
 pillow==11.2.1
