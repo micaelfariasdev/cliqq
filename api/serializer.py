@@ -11,6 +11,7 @@ class PerfilSerializer(serializers.ModelSerializer):
 
 
 class PhotoSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='author.username', read_only=True)
     class Meta:
         model = Photos
         fields = ['id', 'author', 'image', 'title',
