@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from user.models import Photos, Perfil
-
+from .utils import humanize_time_difference
 
 class PerfilSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,11 +12,16 @@ class PerfilSerializer(serializers.ModelSerializer):
 
 class PhotoSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
+    post_hour = serializers.SerializerMethodField()
+    
     class Meta:
         model = Photos
         fields = ['id', 'author', 'image', 'title',
-                  'description', 'views', 'created_at']
-        read_only_fields = ['id', 'author', 'views', 'created_at']
+                  'description', 'views', 'created_at', 'post_hour']
+        read_only_fields = ['id', 'author', 'views', 'created_at', 'post_hour']
+
+    def get_post_hour(self, obj):
+        return humanize_time_difference(obj.created_at)
 
 
 class UserSerializer(serializers.ModelSerializer):
