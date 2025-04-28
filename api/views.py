@@ -6,8 +6,8 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, permissions
-from .serializer import UserSerializer, PhotoSerializer
-from user.models import Photos
+from .serializer import UserSerializer, PhotoSerializer, PerfilSerializer
+from user.models import Photos, Perfil
 
 
 class UserMEViewSet(ViewSet):

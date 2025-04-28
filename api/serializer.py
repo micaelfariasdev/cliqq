@@ -5,7 +5,7 @@ from .utils import humanize_time_difference
 
 
 class PerfilSerializer(serializers.ModelSerializer):
-    author = serializers.CharField(source='user.username', read_only=True)
+    author = serializers.CharField(source='user', read_only=True)
 
     class Meta:
         model = Perfil
