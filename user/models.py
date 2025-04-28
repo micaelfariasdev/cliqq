@@ -6,9 +6,13 @@ from datetime import datetime
 def new_photo_path(instance, filename):
     return f'photos/{instance.author.username}/{datetime.now().year}/{datetime.now().month}/{datetime.now().day}/{instance.title}.{filename.split(".")[-1]}'
 
+def new_photo_profile_path(instance, filename):
+    return f'photos/{instance.user.username}/profile.{filename.split(".")[-1]}'
+
 
 class Perfil(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo_perfil = models.ImageField(upload_to=new_photo_profile_path, blank=True, null=True)
     biografia = models.TextField(blank=True, null=True)
     telefone = models.CharField(max_length=15, blank=True, null=True)
     endereco = models.CharField(max_length=255, blank=True, null=True)

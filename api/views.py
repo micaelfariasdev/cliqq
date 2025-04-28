@@ -1,3 +1,4 @@
+from django.db.models import F
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -7,6 +8,15 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions
 from .serializer import UserSerializer, PhotoSerializer
 from user.models import Photos
+
+
+class UserMEViewSet(ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserView(ViewSet):
@@ -67,3 +77,15 @@ class PhotosView(ViewSet):
             return Response({'detail': 'Foto deletada com sucesso'}, status=status.HTTP_204_NO_CONTENT)
         except Photos.DoesNotExist:
             return Response({'detail': 'Foto não encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class PhotosViewDetail(APIView):
+    def get(self, request, user=None, pk=None):
+        try:
+            photo = Photos.objects.select_related('author', 'author__perfil').get(author__username=user, pk=pk)
+            photo.views += 1
+            photo.save(update_fields=['views']) 
+            serializer = PhotoSerializer(photo)
+            return Response(serializer.data, status=200)
+        except Photos.DoesNotExist:
+            return Response({'detail': 'Foto não encontrada'}, status=404)

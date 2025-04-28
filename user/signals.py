@@ -12,6 +12,18 @@ def delete_photo_file(sender, instance, **kwargs):
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path)
 
+@receiver(pre_save, sender=Perfil)
+def delete_photo_file(sender, instance, **kwargs):
+    if instance.photo_perfil:
+        if os.path.isfile(instance.photo_perfil.path):
+            os.remove(instance.photo_perfil.path)
+
+@receiver(post_delete, sender=Perfil)
+def delete_photo_file(sender, instance, **kwargs):
+    if instance.photo_perfil:
+        if os.path.isfile(instance.photo_perfil.path):
+            os.remove(instance.photo_perfil.path)
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
