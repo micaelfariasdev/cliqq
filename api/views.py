@@ -20,6 +20,8 @@ class UserMEViewSet(ViewSet):
 
 
 class UserView(ViewSet):
+  
+
     def list(self, request):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
@@ -65,7 +67,7 @@ class PhotosView(ViewSet):
             return Response({'error': 'Você precisa estar logado para criar uma foto'}, status=status.HTTP_401_UNAUTHORIZED)
         if serializer.is_valid():
             serializer.save(author=request.user)
-            return Response({'succes': 'criando com sucesso'}, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
@@ -89,3 +91,14 @@ class PhotosViewDetail(APIView):
             return Response(serializer.data, status=200)
         except Photos.DoesNotExist:
             return Response({'detail': 'Foto não encontrada'}, status=404)
+
+class UserViewDetail(APIView):
+    def get(self, request, username=None):
+        try:
+            user = User.objects.filter(username=username).first()
+            if not user:
+                return Response({'detail': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'detail': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
