@@ -16,7 +16,7 @@ class PerfilSerializer(serializers.ModelSerializer):
 
 class PhotoSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
-    photo_perfil = serializers.CharField(source='author.perfil.photo_perfil.url', read_only=True)
+    photo_perfil = serializers.SerializerMethodField()
     post_hour = serializers.SerializerMethodField()
 
     class Meta:
@@ -29,6 +29,12 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     def get_post_hour(self, obj):
         return humanize_time_difference(obj.created_at)
+    
+    def get_photo_perfil(self, obj):
+        perfil = obj.author.perfil
+        if perfil.photo_perfil and hasattr(perfil.photo_perfil, 'url'):
+            return perfil.photo_perfil.url
+        return '/static/default/image.png'
 
 
 

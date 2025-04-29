@@ -16,6 +16,7 @@ class UserMEViewSet(ViewSet):
     def list(self, request):
         user = request.user
         serializer = UserSerializer(user)
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -86,7 +87,7 @@ class PhotosViewDetail(APIView):
         try:
             photo = Photos.objects.select_related('author', 'author__perfil').get(author__username=user, pk=pk)
             photo.views += 1
-            photo.save(update_fields=['views']) 
+            photo.save(update_fields=['views'])
             serializer = PhotoSerializer(photo)
             return Response(serializer.data, status=200)
         except Photos.DoesNotExist:
@@ -98,7 +99,18 @@ class UserViewDetail(APIView):
             user = User.objects.filter(username=username).first()
             if not user:
                 return Response({'detail': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            if not user.perfil.photo_perfil:
+                photo_url = user.perfil.photo_perfil = 'static/default/image.png'   
+                serializer = UserSerializer(user)
+                serializer.data['perfil']['photo_perfil'] =  photo_url
+                for i in serializer.data['photos']:
+                    i['photo_perfil'] = photo_url
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            
             serializer = UserSerializer(user)
+
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'detail': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
