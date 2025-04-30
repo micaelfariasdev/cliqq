@@ -6,7 +6,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, permissions
-from .serializer import UserSerializer, PhotoSerializer, PerfilSerializer
+from .serializer import UserSerializer, PhotoSerializer, LoginSerializer
 from user.models import Photos, Perfil
 
 
@@ -30,21 +30,36 @@ class UserView(ViewSet):
 
     def create(self, request):
         serializer = UserSerializer(data=request.data)
+        
         if serializer.is_valid():
             serializer.save()
             return Response({'detail': 'Usuário criado com sucesso'}, status=status.HTTP_201_CREATED)
+        if serializer.errors:
+            for field, messages in serializer.errors.items():
+                if isinstance(messages, list) and len(messages) > 1:
+                    data_errors = {k:i for k, i in enumerate(messages)}
+                    serializer.errors[field] = data_errors
+                    # print(serializer.errors[field])
+                elif isinstance(messages, str):
+                    serializer.errors[field] = messages
+        error_format = {}
+        for field, messages in serializer.errors.items():
+            if len(messages) > 1:
+                error_format[field] = {k:i for k, i in enumerate(messages)}
+            else:
+                error_format[field] = messages
+        print(error_format)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
     def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        if user:
-            token, created = Token.objects.get_or_create(user=user)
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key})
-        return Response({'detail': 'Credenciais inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):
