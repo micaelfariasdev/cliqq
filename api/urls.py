@@ -16,6 +16,8 @@ urlpatterns = [
         'photos/', views.PhotosView.as_view({'get': 'list'}), name='api-photos-list'),
     path('photo/delete/<int:pk>/',
          views.PhotosView.as_view({'delete': 'delete'}), name='api-photo-delete'),
+    path('photo/like/<int:pk>/',
+         views.PhotosView.as_view({'patch': 'like'}), name='api-photo-like'),
     path('auth/<str:username>/',
          views.UserViewDetail.as_view(), name='api-user-detail'),
     path('photo/view/<str:user>/<int:pk>/',

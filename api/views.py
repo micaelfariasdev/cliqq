@@ -78,6 +78,10 @@ class PhotosView(ViewSet):
 
     def create(self, request):
         self.permission_classes = [permissions.IsAuthenticated]
+        author_user = User.objects.get(username=request.user)
+        print(author_user.photos)
+        if not author_user.perfil.vip and author_user.photos.count() >= 3:
+            return Response({'Error':'Você atingiu o limite máximo de fotos para o Plano Free, para continuar compartilhando faça um Upgrade'}, status=status.HTTP_401_UNAUTHORIZED)
         serializer = PhotoSerializer(data=request.data)
         if not request.user.is_authenticated:
             return Response({'error': 'Você precisa estar logado para criar uma foto'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -95,6 +99,23 @@ class PhotosView(ViewSet):
             return Response({'detail': 'Foto deletada com sucesso'}, status=status.HTTP_204_NO_CONTENT)
         except Photos.DoesNotExist:
             return Response({'detail': 'Foto não encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def like(self, request, pk=None):
+        self.permission_classes = [permissions.IsAuthenticated]
+        try:
+            photo = Photos.objects.get(pk=pk)
+            if request.data['like']: 
+                like = request.data['like']  
+                if request.user.perfil in photo.like.all():
+                    photo.like.remove(request.user.perfil)
+                    serializer = PhotoSerializer(photo)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    photo.like.add(request.user.perfil)
+                    serializer = PhotoSerializer(photo)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+        except Photos.DoesNotExist:
+            return Response({'detail': 'Foto não encontrada'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PhotosViewDetail(APIView):
@@ -107,6 +128,8 @@ class PhotosViewDetail(APIView):
             return Response(serializer.data, status=200)
         except Photos.DoesNotExist:
             return Response({'detail': 'Foto não encontrada'}, status=404)
+        
+   
 
 class UserViewDetail(APIView):
     def get(self, request, username=None):

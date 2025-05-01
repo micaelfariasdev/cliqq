@@ -11,9 +11,9 @@ class PerfilSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Perfil
-        fields = ['author', 'biografia', 'telefone',
-                  'endereco', 'data_nascimento', 'photo_perfil']
-        read_only_fields = ['id', 'author']
+        fields = ['id','author', 'biografia', 'telefone',
+                  'endereco', 'data_nascimento', 'photo_perfil', 'vip']
+        read_only_fields = ['id', 'author', 'vip']
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -24,9 +24,9 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photos
         fields = ['id', 'photo_perfil', 'author', 'image', 'title',
-                  'description', 'views', 'created_at', 'post_hour']
+                  'description', 'views', 'created_at', 'post_hour', 'like']
         read_only_fields = ['id', 'photo_perfil', 'author',
-                            'views', 'created_at', 'post_hour']
+                            'views', 'created_at', 'post_hour', 'like'] 
         
 
     def get_post_hour(self, obj):

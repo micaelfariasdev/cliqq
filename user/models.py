@@ -13,6 +13,7 @@ def new_photo_profile_path(instance, filename):
 class Perfil(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     photo_perfil = models.ImageField(upload_to=new_photo_profile_path, blank=True, null=True)
+    vip = models.BooleanField(blank=True, null=True, default=False)
     biografia = models.TextField(blank=True, null=True)
     telefone = models.CharField(max_length=15, blank=True, null=True)
     endereco = models.CharField(max_length=255, blank=True, null=True)
@@ -29,6 +30,7 @@ class Photos(models.Model):
     views = models.IntegerField(default=0)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    like = models.ManyToManyField(Perfil, related_name='like', blank=True)
 
     def __str__(self):
         return f"Photo by {self.author.username} on {self.created_at}"
