@@ -1,19 +1,34 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from user.models import Photos, Perfil
+from user.models import Photos, Perfil, Story
 from .utils import humanize_time_difference
 from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 
+class StorySerializer(serializers.ModelSerializer):
+    post_hour = serializers.SerializerMethodField()
+    active = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Story
+        fields = '__all__'
+        
+    def get_post_hour(self, obj):
+        return humanize_time_difference(obj.created_at)
+    
+    def get_active(self, obj):
+        now = datetime.now(obj.created_at.tzinfo)
+        return (now - obj.created_at) < timedelta(hours=24)
 
 class PerfilSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='user', read_only=True)
 
     class Meta:
         model = Perfil
-        fields = ['author', 'biografia', 'telefone',
-                  'endereco', 'data_nascimento', 'photo_perfil']
-        read_only_fields = ['id', 'author']
+        fields = ['id','author', 'biografia', 'telefone',
+                  'endereco', 'data_nascimento', 'photo_perfil', 'vip']
+        read_only_fields = ['id', 'author', 'vip']
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -24,9 +39,9 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photos
         fields = ['id', 'photo_perfil', 'author', 'image', 'title',
-                  'description', 'views', 'created_at', 'post_hour']
+                  'description', 'views', 'created_at', 'post_hour', 'like']
         read_only_fields = ['id', 'photo_perfil', 'author',
-                            'views', 'created_at', 'post_hour']
+                            'views', 'created_at', 'post_hour', 'like'] 
         
 
     def get_post_hour(self, obj):

@@ -1,7 +1,8 @@
 import os
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
-from .models import Photos, Perfil
+from .models import Photos, Perfil, Story
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from PIL import Image
 
@@ -42,3 +43,9 @@ def delete_photo_file(sender, instance, **kwargs):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Perfil.objects.create(user=instance)
+
+@receiver(post_delete, sender=Story)
+def delete_story_file(sender, instance, **kwargs):
+    if instance.story_photo:
+        if os.path.isfile(instance.story_photo.path):
+            os.remove(instance.story_photo.path)

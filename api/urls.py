@@ -1,7 +1,12 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 from . import views
 
-urlpatterns = [
+router = DefaultRouter()
+router.register('stories', views.StoryApi, basename='story')
+urlpatterns = router.urls
+
+urlpatterns += [
     path('auth/register/',
          views.UserView.as_view({'post': 'create'}), name='api-user-register'),
     path('auth/me/',
@@ -16,6 +21,8 @@ urlpatterns = [
         'photos/', views.PhotosView.as_view({'get': 'list'}), name='api-photos-list'),
     path('photo/delete/<int:pk>/',
          views.PhotosView.as_view({'delete': 'delete'}), name='api-photo-delete'),
+    path('photo/like/<int:pk>/',
+         views.PhotosView.as_view({'patch': 'like'}), name='api-photo-like'),
     path('auth/<str:username>/',
          views.UserViewDetail.as_view(), name='api-user-detail'),
     path('photo/view/<str:user>/<int:pk>/',
