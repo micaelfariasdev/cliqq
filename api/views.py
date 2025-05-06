@@ -5,9 +5,11 @@ from django.contrib.auth.models import User
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 from rest_framework import status, permissions
-from .serializer import UserSerializer, PhotoSerializer, LoginSerializer
-from user.models import Photos, Perfil
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin
+from .serializer import UserSerializer, PhotoSerializer, LoginSerializer, StorySerializer
+from user.models import Photos, Story
 
 
 class UserMEViewSet(ViewSet):
@@ -16,12 +18,11 @@ class UserMEViewSet(ViewSet):
     def list(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserView(ViewSet):
-  
 
     def list(self, request):
         users = User.objects.all()
@@ -30,14 +31,14 @@ class UserView(ViewSet):
 
     def create(self, request):
         serializer = UserSerializer(data=request.data)
-        
+
         if serializer.is_valid():
             serializer.save()
             return Response({'detail': 'Usuário criado com sucesso'}, status=status.HTTP_201_CREATED)
         if serializer.errors:
             for field, messages in serializer.errors.items():
                 if isinstance(messages, list) and len(messages) > 1:
-                    data_errors = {k:i for k, i in enumerate(messages)}
+                    data_errors = {k: i for k, i in enumerate(messages)}
                     serializer.errors[field] = data_errors
                     # print(serializer.errors[field])
                 elif isinstance(messages, str):
@@ -45,7 +46,7 @@ class UserView(ViewSet):
         error_format = {}
         for field, messages in serializer.errors.items():
             if len(messages) > 1:
-                error_format[field] = {k:i for k, i in enumerate(messages)}
+                error_format[field] = {k: i for k, i in enumerate(messages)}
             else:
                 error_format[field] = messages
         print(error_format)
@@ -81,7 +82,7 @@ class PhotosView(ViewSet):
         author_user = User.objects.get(username=request.user)
         print(author_user.photos)
         if not author_user.perfil.vip and author_user.photos.count() >= 3:
-            return Response({'Error':'Você atingiu o limite máximo de fotos para o Plano Free, para continuar compartilhando faça um Upgrade'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'Error': 'Você atingiu o limite máximo de fotos para o Plano Free, para continuar compartilhando faça um Upgrade'}, status=status.HTTP_401_UNAUTHORIZED)
         serializer = PhotoSerializer(data=request.data)
         if not request.user.is_authenticated:
             return Response({'error': 'Você precisa estar logado para criar uma foto'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -99,13 +100,13 @@ class PhotosView(ViewSet):
             return Response({'detail': 'Foto deletada com sucesso'}, status=status.HTTP_204_NO_CONTENT)
         except Photos.DoesNotExist:
             return Response({'detail': 'Foto não encontrada'}, status=status.HTTP_404_NOT_FOUND)
-        
+
     def like(self, request, pk=None):
         self.permission_classes = [permissions.IsAuthenticated]
         try:
             photo = Photos.objects.get(pk=pk)
-            if request.data['like']: 
-                like = request.data['like']  
+            if request.data['like']:
+                like = request.data['like']
                 if request.user.perfil in photo.like.all():
                     photo.like.remove(request.user.perfil)
                     serializer = PhotoSerializer(photo)
@@ -121,15 +122,15 @@ class PhotosView(ViewSet):
 class PhotosViewDetail(APIView):
     def get(self, request, user=None, pk=None):
         try:
-            photo = Photos.objects.select_related('author', 'author__perfil').get(author__username=user, pk=pk)
+            photo = Photos.objects.select_related(
+                'author', 'author__perfil').get(author__username=user, pk=pk)
             photo.views += 1
             photo.save(update_fields=['views'])
             serializer = PhotoSerializer(photo)
             return Response(serializer.data, status=200)
         except Photos.DoesNotExist:
             return Response({'detail': 'Foto não encontrada'}, status=404)
-        
-   
+
 
 class UserViewDetail(APIView):
     def get(self, request, username=None):
@@ -138,17 +139,40 @@ class UserViewDetail(APIView):
             if not user:
                 return Response({'detail': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
             if not user.perfil.photo_perfil:
-                photo_url = user.perfil.photo_perfil = 'static/default/image.png'   
+                photo_url = user.perfil.photo_perfil = 'static/default/image.png'
                 serializer = UserSerializer(user)
-                serializer.data['perfil']['photo_perfil'] =  photo_url
+                serializer.data['perfil']['photo_perfil'] = photo_url
                 for i in serializer.data['photos']:
                     i['photo_perfil'] = photo_url
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
-            
             serializer = UserSerializer(user)
-
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'detail': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class StoryApi(CreateModelMixin,
+               ListModelMixin,
+               RetrieveModelMixin,
+               DestroyModelMixin,
+               GenericViewSet):
+    serializer_class = StorySerializer
+
+    def get_queryset(self):
+        queryset = Story.objects.all()
+        user_filter = self.request.query_params.get('perfil')
+        if user_filter:
+            queryset = queryset.filter(author__user__username=user_filter)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        ativos = []
+        for item in serializer.data:
+            if item['active'] is True:
+                ativos.append(item)
+
+        return Response(ativos)

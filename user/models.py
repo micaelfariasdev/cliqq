@@ -6,6 +6,9 @@ from datetime import datetime
 def new_photo_path(instance, filename):
     return f'photos/{instance.author.username}/{datetime.now().year}/{datetime.now().month}/{datetime.now().day}/{instance.title}.{filename.split(".")[-1]}'
 
+def new_story_path(instance, filename):
+    return f'photos/{instance.author.user.username}/{datetime.now().year}/{datetime.now().month}/{datetime.now().day}/story-{datetime.now().time()}.{filename.split(".")[-1]}'
+
 def new_photo_profile_path(instance, filename):
     return f'photos/{instance.user.username}/profile.{filename.split(".")[-1]}'
 
@@ -34,3 +37,9 @@ class Photos(models.Model):
 
     def __str__(self):
         return f"Photo by {self.author.username} on {self.created_at}"
+
+class Story(models.Model):
+    author = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name='story')
+    story_photo = models.ImageField(upload_to=new_story_path)
+    created_at = models.DateTimeField(auto_now_add=True)
+

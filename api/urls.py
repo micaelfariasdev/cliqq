@@ -1,7 +1,12 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 from . import views
 
-urlpatterns = [
+router = DefaultRouter()
+router.register('stories', views.StoryApi, basename='story')
+urlpatterns = router.urls
+
+urlpatterns += [
     path('auth/register/',
          views.UserView.as_view({'post': 'create'}), name='api-user-register'),
     path('auth/me/',

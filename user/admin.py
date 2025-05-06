@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Photos, Perfil
+from .models import Photos, Perfil, Story
 
 
 @admin.register(Photos)
@@ -15,3 +15,10 @@ class PerfilAdmin(admin.ModelAdmin):
                     'telefone', 'endereco', 'data_nascimento']
     search_fields = ['user']
     list_filter = ['id', 'user']
+
+@admin.register(Story)
+class StoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'author', 'story_photo',
+                    'created_at']
+    search_fields = ['author']
+    list_filter = ['id', 'author']
