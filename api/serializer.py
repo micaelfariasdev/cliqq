@@ -79,7 +79,7 @@ class UserSerializer(serializers.ModelSerializer):
         password = data.get('password')
         password_errors = []
 
-        username = data.get('username')
+        username = data.get('username').lower()
         username_errors = []
 
         if len(password) < 8:
